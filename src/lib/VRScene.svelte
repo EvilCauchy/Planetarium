@@ -1,102 +1,82 @@
-<script>
+<script lang="ts">
 	import { XR, Controller, Hand, useHandJoint, pointerControls } from '@threlte/xr';
-	import { currentWritable, T, useTask } from '@threlte/core';
+	import { T } from '@threlte/core';
 	import { interactivity } from '@threlte/extras';
-	import { Spring } from 'svelte/motion';
-	import Doghead from './doghead.svelte';
+	import DynamicSphere from './DynamicSphere.svelte';
+	import { Text3DGeometry } from '@threlte/extras'
 
+	// Initialize XR input and interactivity.
 	const joint = useHandJoint('left', 'wrist');
 	pointerControls('right');
-
 	interactivity();
 
-	const scale = new Spring(1);
 
-	let rotating = $state(true);
+	const radii = [0.4, 0.7, 1, 1.3];
+	let spheres = [];
+	let sphereCounter = 0;
 
-	let rotation = $state(0);
-	useTask((delta) => {
-		if (rotating) {
-			rotation += delta;
-		}
-	});
-
-	const colors = ['red', 'blue', 'green'];
-
-	let color = $state('red');
-
-	const changeColor = () => {
-		const currentIndex = colors.indexOf(color);
-		const nextIndex = (currentIndex + 1) % colors.length;
-		color = colors[nextIndex];
+	const spawnSphere = (event) => {
+		const point = event.detail?.point;
+		const position = point
+			? [point.x, point.y, point.z]
+			: [
+					Math.random() * 7 + 2,
+					Math.random() * 5 + 2,
+					Math.random() * 7 + 2
+			  ];
+		const currentRadius = radii[sphereCounter % radii.length];
+		spheres = [
+			...spheres,
+			{
+				id: sphereCounter,
+				position,
+				radius: currentRadius
+			}
+		];
+		sphereCounter++;
+		console.log('Spawned sphere:', { position, currentRadius });
 	};
 
-	const onpinchstart = () => {
-		scale.target = 2;
-	};
-	const onpinchend = () => {
-		scale.target = 1;
-	};
 
-	const onleftpinchstart = () => {
-		rotating = false;
-	};
-	const onleftpinchend = () => {
-		rotating = true;
-	};
+
 </script>
 
-{@debug joint}
 
 <T.PerspectiveCamera
 	makeDefault
-	position={[10, 10, 10]}
-	oncreate={(ref) => {
-		ref.lookAt(0, 1, 0);
-	}}
+	position={[13, 13, 13]}
+	oncreate={(ref) => ref.lookAt(0, 1, 0)}
 />
-
-<T.DirectionalLight position={[0, 10, 10]} castShadow />
+<T.DirectionalLight position={[0, 15, 15]} castShadow />
 <T.AmbientLight />
-<Doghead
-	position={[0, 1, 0]}
-	rotation={[0, rotation, 0]}
-	scale={scale.current}
-	onpointerenter={() => {
-		scale.target = 1.2;
-	}}
-	onpointerleave={() => {
-		scale.target = 1;
-	}}
-	onclick={changeColor}
-	castShadow
-/>
+
 
 <T.Mesh
-	rotation.y={rotation}
-	position.y={1}
-	scale={scale.current}
-	onpointerenter={() => {
-		scale.target = 1.2;
-	}}
-	onpointerleave={() => {
-		scale.target = 1;
-	}}
-	onclick={changeColor}
-	castShadow
-	position={[-1, 1, -1]}
+	rotation.x={-Math.PI / 2}
+	receiveShadow
+	position={[0, 0, 0]}
+	onclick={spawnSphere}
 >
-	<T.BoxGeometry args={[0.2, 0.6, 0.2]} />
-	<T.MeshStandardMaterial {color} />
-</T.Mesh>
-
-<T.Mesh rotation.x={-Math.PI / 2} receiveShadow position={[0, 0, 0]}>
-	<T.CircleGeometry args={[4, 40]} />
+	<T.CircleGeometry args={[15, 10]} />
 	<T.MeshStandardMaterial color="white" />
 </T.Mesh>
 
+
+<T.Mesh>
+	<Text3DGeometry text={'Hello World'} />
+	<T.MeshStandardMaterial />
+</T.Mesh>
+
+{#each spheres as sphere (sphere.id)}
+	<DynamicSphere position={sphere.position} radius={sphere.radius} />
+{/each}
+
+
+
+<!-- XR components -->
 <XR />
 <Controller left />
 <Controller right />
-<Hand left onpinchstart={onleftpinchstart} onpinchend={onleftpinchend} />
-<Hand right {onpinchstart} {onpinchend} />
+<Hand left />
+<Hand right />
+
