@@ -104,12 +104,6 @@
 	$: currentColor = interpolateColor(factor, colorStops[currentIndex], colorStops[nextIndex]);
 </script>
 
-<!--
-	Note the usage of onpointerenter and onpointerleave (without colons)
-	to trigger hover events. When hovered:
-	• scaleSpring.target is set to 1.3 (the sphere scales up),
-	• hovered is set to true (which pauses movement and color updates).
--->
 <T.Mesh
 	position={currentPosition}
 	castShadow
