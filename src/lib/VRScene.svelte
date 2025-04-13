@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { XR, Controller, Hand, useHandJoint, pointerControls } from '@threlte/xr';
 	import { T } from '@threlte/core';
 	import { interactivity } from '@threlte/extras';
@@ -11,7 +11,7 @@
 	interactivity();
 
 
-	const radii = [0.4, 0.7, 1, 1.3];
+	const radii = [0.4, 0.7, 1];
 	let spheres = [];
 	let sphereCounter = 0;
 
@@ -62,11 +62,6 @@
 </T.Mesh>
 
 
-<T.Mesh>
-	<Text3DGeometry text={'Hello World'} />
-	<T.MeshStandardMaterial />
-</T.Mesh>
-
 {#each spheres as sphere (sphere.id)}
 	<DynamicSphere position={sphere.position} radius={sphere.radius} />
 {/each}
@@ -79,4 +74,3 @@
 <Controller right />
 <Hand left />
 <Hand right />
-

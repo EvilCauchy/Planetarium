@@ -1,24 +1,18 @@
 <script>
 	import { T, useTask } from '@threlte/core';
 	import { Spring } from 'svelte/motion';
+	import { Text3DGeometry } from '@threlte/extras';
 
 	// Props: initial position and sphere radius.
 	export let position = [0, 0, 0];
 	export let radius = 1;
 
-	// ---------------------------
-	// HOVER & SCALING LOGIC
-	// ---------------------------
-	// Create a spring for smooth scaling (default value 1).
+
 	const scaleSpring = new Spring(1);
 
 	// Use a local flag to indicate whether the sphere is hovered.
 	let hovered = false;
 
-	// ---------------------------
-	// ORBITING LOGIC (around [0, 0, 0])
-	// ---------------------------
-	// Use the provided position as the initial offset from the origin.
 	const initialOffset = position;
 
 	// Helper functions for vector math.
@@ -73,9 +67,8 @@
 		? rotateVector(initialOffset, orbitAxis, orbitRotation)
 		: initialOffset;
 
-	// ---------------------------
-	// COLOR INTERPOLATION LOGIC
-	// ---------------------------
+
+	// Color interpolation
 	let t = 0;
 	const colorSpeed = 0.5;
 	// Only update the color timer when not hovered.
@@ -102,6 +95,8 @@
 		return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
 	}
 	$: currentColor = interpolateColor(factor, colorStops[currentIndex], colorStops[nextIndex]);
+
+	
 </script>
 
 <T.Mesh
@@ -121,3 +116,11 @@
 	<T.MeshStandardMaterial color={currentColor} />
 </T.Mesh>
 
+{#if hovered}
+<T.Mesh
+	position={[currentPosition[0] + 1.3*radius, currentPosition[1], currentPosition[2]]}>
+	<Text3DGeometry text={"Sphere"} size={0.5*radius} depth={0.1}/>
+	<T.MeshStandardMaterial color = "black" />
+  </T.Mesh>
+
+{/if}
